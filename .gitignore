@@ -1,0 +1,12 @@
+# Terraform state & caches
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+# Local settings
+*.tfvars
+
+terraform.tfstate*
+*.log
+terraform.tfvars 
+*.tfvars 

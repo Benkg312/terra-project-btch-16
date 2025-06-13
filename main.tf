@@ -13,14 +13,29 @@ module "compute" {
   subnet_ids      = module.network.public_subnet_ids
   key_name        = var.key_name
   ami_id          = data.aws_ami.al2.id
-  web_sg_id       = module.network.alb_sg_id
-  user_data_extra = <<-EOT
-    yum install -y httpd
-    systemctl enable httpd
-    systemctl start httpd
-    echo "<h1>Deployed via Terraform in $(hostname) ✨</h1>" > /var/www/html/index.html
-  EOT
+  web_sg_id       = module.network.web_sg_id
+  user_data_extra = <<-EOF
+#!/bin/bash
+set -e
+
+yum -y update
+yum -y install httpd
+
+# itself index.html
+cat >/var/www/html/index.html <<'HTML'
+<html><body><h1>Hello from Ben Deployed via Terraform in $(hostname)</h1></body></html>
+HTML
+
+systemctl enable httpd
+systemctl restart httpd
+EOF
 }
+
+# set -e , yum update -y
+#   cat <<'HTML' >/var/www/html/index.html
+#   <html><body><h1>Deployed via Terraform in $(hostname)</h1></body></html>
+#   HTML
+# EOF
 
 module "alb" {
   source              = "./modules/alb"

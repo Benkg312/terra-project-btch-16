@@ -9,8 +9,7 @@ resource "aws_instance" "web" {
   instance_type          = "t2.micro"
   key_name               = data.aws_key_pair.this.key_name
   vpc_security_group_ids = [var.web_sg_id]
-  user_data              = base64encode(var.user_data_extra)
-  
+  user_data              = var.user_data_extra
   tags = {
     Name = "${var.project_name}-web-${each.key}"
   }

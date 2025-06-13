@@ -71,8 +71,8 @@ resource "aws_route_table_association" "private" {
 # Security groups shared by other modules
 resource "aws_security_group" "web" {
   name        = "${var.project_name}-web-sg"
-  description = "Allow HTTP from ALB"
   vpc_id      = aws_vpc.this.id
+  description = "Allow HTTP from ALB"
 
   ingress {
     from_port   = 80
@@ -91,6 +91,15 @@ resource "aws_security_group" "web" {
 resource "aws_security_group" "alb" {
   name   = "${var.project_name}-alb-sg"
   vpc_id = aws_vpc.this.id
+
+  # new rules for ALB
+  ingress {
+    description = "HTTP from anywhere"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   ingress {
     description = "HTTPS from anywhere"
     from_port   = 443
@@ -104,4 +113,13 @@ resource "aws_security_group" "alb" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_security_group_rule" "alb_to_web_http" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.web.id          # SG instances
+  source_security_group_id = aws_security_group.alb.id          # SG ALB
 }
